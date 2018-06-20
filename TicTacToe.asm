@@ -2,6 +2,21 @@
 ; For emu8086
 ; Made by Oz Elentok
 data segment
+
+	str_TAM = 15 ; tamanho maximo da string
+
+	; buffers salvam strings de player 1 e 2
+	player1		db	str_TAM dup (?)
+				db	1 dup (?)	;	posicao extra para guardar '$'
+	player2		db	str_TAM dup (?)
+				db 1 dup (?)	;	posicao extra para guardar '$'
+	msg1		db "Player 1 enter a name: $"
+	msg2		db "Player 2 enter a name: $"
+	msgSymbol1	db "Player 1 enter a symbol: $"
+	msg1		db "Player 2 enter a symbol: $"
+	char1		db 2 dup (?)	;	simbolo player 1
+	char2		db 2 dup (?)	;	simbolo player 2
+
 	grid db 9 dup(0)
 	player db 0
 	win db 0
