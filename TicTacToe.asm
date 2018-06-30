@@ -1,8 +1,11 @@
 ; Tic-tac-toe assmebly
 ; For emu8086
 ; Made by Oz Elentok
+;
+; Modificado por Rodrigo Sousa Alves
 data segment
 
+; /// --------------------------------------------
 	str_TAM = 15 ; tamanho maximo da string
 
 	; buffers salvam strings de player 1 e 2
@@ -16,6 +19,7 @@ data segment
 	msg1		db "Player 2 enter a symbol: $"
 	char1		db 2 dup (?)	;	simbolo player 1
 	char2		db 2 dup (?)	;	simbolo player 2
+; \\\ --------------------------------------------
 
 	grid db 9 dup(0)
 	player db 0
@@ -25,8 +29,9 @@ data segment
 	welcome db "Tic Tac Toe Game - By Oz Elentok$"
 	separator db "---|---|---$"
 	enterLoc db "Enter your move by location(1-9)$"
-	turnMessageX db "Player 1 (X) turn$"
-	turnMessageO db "Player 2 (O) turn$"
+; /// --------------------------------------------
+	turnMessage db " turn$"
+; \\\ --------------------------------------------
 	tieMessage db "A tie between the two players!$"
 	winMessage db "The player who won was player $"
 	inDigitError db "ERROR!, this place is taken$"
@@ -42,12 +47,56 @@ start:
 	mov ax, data
 	mov ds, ax
 	mov es, ax
-	
+
 	newGame:
+; /// --------------------------------------------
+	; realiza a escolha dos caracteres
+	lea dx, msgSymbol1
+	call printString
+	mov cx, 1
+	mov dx, offset char1
+	call getStr
+	lea dx, newline
+	call printString
+
+	lea dx, msgSymbol2
+	call printString
+	mov cx, 1
+	mov dl, offset char2
+	call getStr
+	lea dx, newline
+	call printString
+
+	; PLAYER 01
+	lea dx, msg1
+	call printString
+
+	; convoca getstr para ler o nome do player 1 do teclado
+	mov cx, str_TAM
+	mov dx, offset player1
+	call getstr
+
+	lea dx, newline
+	call printString
+
+	; PLAYER 02
+	lea dx, msg2
+	call printString
+
+	; convoca getstr para ler o nome do player 2 do teclado
+	mov cx, str_TAM
+	mov dx, offset player2
+	call getstr
+
+	lea dx, newline
+	call printString
+; \\\ --------------------------------------------	
+
 	call initiateGrid
 	mov player, 10b; 2dec
 	mov win, 0
 	mov cx, 9
+
 	gameAgain:
 		call clearScreen
 		lea dx, welcome
@@ -65,14 +114,30 @@ start:
 		je p2turn
 			; previous player was 2
 			shr player, 1; 0010b --> 0001b;
-			lea dx, turnMessageX
+; /// --------------------------------------------
+			lea dx, offset player1
 			call printString
+			mov dl, ':'
+			call putChar
+			mov dl, char1
+			call putChar
+			lea dx, turnMessage
+			call printString
+; \\\ --------------------------------------------
 			lea dx, newline
 			call printString
 			jmp endPlayerSwitch
 		p2turn:; previous player was 1
 			shl player, 1; 0001b --> 0010b
-			lea dx, turnMessageO
+; /// --------------------------------------------
+			mov dx, offset player2
+			call printString
+			mov dl, ':'
+			call putChar
+			mov dl, char2
+			call putChar
+			lea dx, turnMessage
+; \\\ --------------------------------------------
 			call printString
 			lea dx, newline
 			call printString
@@ -82,10 +147,14 @@ start:
 		mov dl, player
 		cmp dl, 1
 		jne p2move
-		mov dl, 'X'
+; /// --------------------------------------------
+		mov dl, char1
+; \\\ --------------------------------------------
 		jmp contMoves
 		p2move:
-		mov dl, 'O'
+; /// --------------------------------------------
+		mov dl, char2
+; \\\ --------------------------------------------
 		contMoves:
 		mov [bx], dl
 		cmp cx, 5 ; no need to check before the 5th turn
@@ -123,9 +192,15 @@ start:
 	 lea dx, winMessage
 	 call printString
 	 mov dl, player
+; /// --------------------------------------------
+	 cmp dl, 1
+	 je printPlayer1
+	 mov dx, offset player2
+	 call printString
+	 here:
 	 add dl, '0'
-	 call putChar
 	 lea dx, newline
+; \\\ --------------------------------------------
 	 call printString
 	 
 	askForNewGame:
@@ -154,6 +229,9 @@ getChar:
 ; Output char from dl
 ; Sets ah to last char output
 putChar:
+; /// --------------------------------------------
+; ????????????????	mov ah, 02h
+; \\\ --------------------------------------------
 	mov ah, 02
 	int 21h
 	ret
@@ -427,6 +505,65 @@ CheckColumns:
 	mov win, 1
 	endCheckColumns:
 	ret
+
+; /// --------------------------------------------
+	printPlayer1:
+	mov dx, offset player1
+	call printString
+	jmp here
+
+	getStr proc
+
+	; preserva o uso dos registradores
+	push ax
+	push bx
+	push si
+
+	; si usado como base address
+	mov si, dx
+
+	;bx usado como indice para o base address
+	mov bx, 0
+
+	L11:
+		; le o proximo caracter
+		mov ah, 1
+		int 21h
+
+		; verifica se nao eh retorno (indicando o fim de linha)
+		cmp al, 13	; return caracter
+		jz L12
+
+		; salva o caracter lido no buffer
+		mov [si][bx], al
+
+		; proximo indice do buffer
+		inc bx
+
+	L12:
+		; loop enquanto o contador eh zero
+		; se nao for retorna caracter
+		loopnz L11
+
+		; bx contem o tamanho da string
+		; salva em cx
+		mov cx, bx
+
+		; adiciona na sequencia retornada
+		; inc bx
+		; mov [si][bx], 10
+
+		; nova linha e
+		; inc bx
+		; mov [si][bx], 10
+
+		; libera registradores usados
+		pop si
+		pop bx
+		pop ax
+		ret
+	getstr endp
+; \\\ --------------------------------------------
 	
 ends
 end start
