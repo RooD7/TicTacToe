@@ -502,13 +502,22 @@ checkWin:
 	ret
 	
 drawDiag1:
+	mov bx, si
+	mov al, [bx]
+	add bx, 4	;grid[0] ---> grid[4]
+	cmp al, [bx]
+	jne diagonalRtL
+	add bx, 4	;grid[4] ---> grid[8]
+	cmp al, [bx]
+	jne diagonalRtL
+	mov win, 1
+	;call drawDiag1
 
-drawDiag2:
+; drawDiag2:
 
-drawRow:
+; drawRow:
 
-drawCol:
-
+; drawCol:
 
 ;-------------------------------------------;	
 checkDiagonal:
@@ -521,8 +530,8 @@ checkDiagonal:
 	add bx, 4	;grid[4] ---> grid[8]
 	cmp al, [bx]
 	jne diagonalRtL
-	;mov win, 1
-	call drawDiag1
+	mov win, 1
+	;call drawDiag1
 	ret
 	
 	diagonalRtL:
@@ -535,8 +544,8 @@ checkDiagonal:
 	add bx, 2	;grid[4] ---> grid[6]
 	cmp al, [bx]
 	jne endCheckDiagonal
-	;mov win, 1
-	call drawDiag2
+	mov win, 1
+	;call drawDiag2
 	endCheckDiagonal:
 	ret
 	
@@ -551,8 +560,8 @@ checkRows:
 	inc bx		;grid[1] ---> grid[2]
 	cmp al, [bx]
 	jne secondRow
-	;mov win, 1
-	call drawRow
+	mov win, 1
+	;call drawRow
 	ret
 	
 	secondRow:
@@ -565,8 +574,8 @@ checkRows:
 	inc bx	;grid[4] ---> grid[5]
 	cmp al, [bx]
 	jne thirdRow
-	;mov win, 1
-	call drawRow
+	mov win, 1
+	;call drawRow
 	ret
 	
 	thirdRow:
@@ -579,8 +588,8 @@ checkRows:
 	inc bx	;grid[7] ---> grid[8]
 	cmp al, [bx]
 	jne endCheckRows
-	;mov win, 1
-	call drawRow
+	mov win, 1
+	;call drawRow
 	endCheckRows:
 	ret
 	
@@ -595,8 +604,8 @@ CheckColumns:
 	add bx, 3	;grid[3] ---> grid[6]
 	cmp al, [bx]
 	jne secondColumn
-	;mov win, 1
-	call drawCol
+	mov win, 1
+	;call drawCol
 	ret
 	
 	secondColumn:
@@ -609,8 +618,8 @@ CheckColumns:
 	add bx, 3	;grid[4] ---> grid[7]
 	cmp al, [bx]
 	jne thirdColumn
-	;mov win, 1
-	call drawCol
+	mov win, 1
+	;call drawCol
 	ret
 	
 	thirdColumn:
@@ -623,8 +632,8 @@ CheckColumns:
 	add bx, 3	;grid[5] ---> grid[8]
 	cmp al, [bx]
 	jne endCheckColumns
-	;mov win, 1
-	call drawCol
+	mov win, 1
+	;call drawCol
 	endCheckColumns:
 	ret
 	       
