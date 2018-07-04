@@ -1,41 +1,48 @@
-; Tic-tac-toe assmebly
+name "Tic-Tac-Toe"
+
+;Tic-tac-toe assembly
 ; For emu8086
 ; Made by Oz Elentok
 ;
 ; Modificado por Rodrigo Sousa Alves
 data segment
-
-; /// --------------------------------------------
-	str_TAM = 15 ; tamanho maximo da string
-
-	; buffers salvam strings de player 1 e 2
-	player1		db	str_TAM dup (?)
-				db	1 dup (?)	;	posicao extra para guardar '$'
-	player2		db	str_TAM dup (?)
-				db 1 dup (?)	;	posicao extra para guardar '$'
-	msg1		db "Player 1 enter a name: $"
-	msg2		db "Player 2 enter a name: $"
-	msgSymbol1	db "Player 1 enter a symbol: $"
-	msg1		db "Player 2 enter a symbol: $"
-	char1		db 2 dup (?)	;	simbolo player 1
-	char2		db 2 dup (?)	;	simbolo player 2
-; \\\ --------------------------------------------
-
+    
+    strtam= 15 ; tamanho maximo da string   
+    
+    ; buffers salvam strings de player 1 e 2
+    player1     db  strtam dup (?)
+                db  1 dup (?) ; posiçao extra para guardar '$'
+    player2     db  strtam dup (?)
+                db  1 dup (?) ;posiçao extra para guardar '$'
+    msgName1    db "Player 1 escolha um nome: $"
+    msgName2    db "Player 2 escolha um nome: $"
+    msgSymbol1  db "Player 1 escolha um simbolo: $"
+    msgSymbol2  db "Player 2 escolha um simbolo: $"
+    char1       db 2 dup (?); simbolo player 1
+    char2       db 2 dup (?); simbolo player 2
+    menuTitle	db "-_-_- MENU -_-_-$"
+	menuItem1	db "1. Inserir/Alterar nome do Jogador 1.$"
+	menuItem2	db "2. Inserir/Alterar nome do Jogador 2.$"
+	menuItem3	db "3. Escolher o simbolo e cor do Jogador 1.$"
+	menuItem4	db "4. Escolher o simbolo e cor do Jogador 2.$"
+	menuItem5	db "5. Escolher a cor do tabuleiro.$"
+	menuItem6	db "6. Iniciar jogo.$"
+	menuItem7	db "7. Sair.$"
+	msgOpcao	db "Escolha uma opcao: $"
+    
 	grid db 9 dup(0)
 	player db 0
 	win db 0
 	temp db 0
-	newGameQuest db "Would you like a rematch? (y - yes, any key - no)$"
+	quitGameQuest db "Gostaria de sair sair da aplicacao? (s - sim; n - nao)$"
 	welcome db "Tic Tac Toe Game - By Oz Elentok$"
 	separator db "---|---|---$"
-	enterLoc db "Enter your move by location(1-9)$"
-; /// --------------------------------------------
-	turnMessage db " turn$"
-; \\\ --------------------------------------------
-	tieMessage db "A tie between the two players!$"
-	winMessage db "The player who won was player $"
-	inDigitError db "ERROR!, this place is taken$"
-	inError db "ERROR!, input is not a digit$"
+	enterLoc db "Escolha seu movimento pela localizacao(1-9)$"
+	turnMessage db " turno$"
+	tieMessage db "Um empate ocorreu entre os 2 jogadores!$"
+	winMessage db "O jogador vencedor eh $"
+	inDigitError db "ERROR!, digito invalido$"
+	inError db "ERROR!, o valor digitado nao eh um numero$"
 	newline db 0Dh,0Ah,'$'
 ends
 stack segment
@@ -44,59 +51,80 @@ ends
 
 code segment
 start:
+	;Tamanho da tela setado para 40x25 
+
+	; mov al, 00h; Seta a dimensao da tela, 00h corresponde a 40x25 no modo texto.
+	; mov ah, 0  ; Seta o modo de video.
+	; int 10h    ; Interrupcao de video.
+
 	mov ax, data
 	mov ds, ax
-	mov es, ax
+	mov es, ax  
+	
+	call menu
+
+	; PLAYER 1
+	getNameP1:
+		lea dx, newline
+		call printString
+		lea dx, msgName1
+		call printString
+		; chama getstr pra ler o nome do player 1 do teclado
+	    mov     cx, strtam
+	    mov     dx, offset player1
+	    call    getstr
+	                     	
+	    lea dx, newline
+		call printString
+		call menu
+	             
+	;escolhe os caracteres
+	getSymbolP1:  
+		lea dx, newline
+		call printString
+		lea dx, msgSymbol1
+		call printString
+		mov cx, 1
+		mov dx, offset char1
+		call getStr
+		lea dx, newline
+		call printString
+		call menu
+
+	; PLAYER 2
+	getNameP2:
+		lea dx, newline
+		call printString   
+		lea dx, msgName2
+		call printString
+		; chama getstr pra ler o nome do player 2 do teclado
+	    mov     cx, strtam
+	    mov     dx, offset player2
+	    call    getstr
+	    
+	    lea dx, newline
+		call printString
+		call menu
+	
+	getSymbolP2:
+		lea dx, newline
+		call printString
+		lea dx, msgSymbol2
+		call printString
+		mov cx, 1
+		mov dl, offset char2
+		call getStr
+		lea dx, newline
+		call printString
+		call menu
 
 	newGame:
-; /// --------------------------------------------
-	; realiza a escolha dos caracteres
-	lea dx, msgSymbol1
-	call printString
-	mov cx, 1
-	mov dx, offset char1
-	call getStr
-	lea dx, newline
-	call printString
-
-	lea dx, msgSymbol2
-	call printString
-	mov cx, 1
-	mov dl, offset char2
-	call getStr
-	lea dx, newline
-	call printString
-
-	; PLAYER 01
-	lea dx, msg1
-	call printString
-
-	; convoca getstr para ler o nome do player 1 do teclado
-	mov cx, str_TAM
-	mov dx, offset player1
-	call getstr
-
-	lea dx, newline
-	call printString
-
-	; PLAYER 02
-	lea dx, msg2
-	call printString
-
-	; convoca getstr para ler o nome do player 2 do teclado
-	mov cx, str_TAM
-	mov dx, offset player2
-	call getstr
-
-	lea dx, newline
-	call printString
-; \\\ --------------------------------------------	
-
-	call initiateGrid
-	mov player, 10b; 2dec
-	mov win, 0
-	mov cx, 9
-
+	
+	    call initiateGrid
+		mov player, 10b; 2dec
+		mov win, 0
+		mov cx, 9
+	
 	gameAgain:
 		call clearScreen
 		lea dx, welcome
@@ -106,117 +134,187 @@ start:
 		lea dx, enterLoc
 		call printString
 		lea dx, newline
-		call printString
+		call printString 
 		call printString
 		call printGrid
 		mov al, player
 		cmp al, 1
 		je p2turn
-			; previous player was 2
-			shr player, 1; 0010b --> 0001b;
-; /// --------------------------------------------
-			lea dx, offset player1
-			call printString
-			mov dl, ':'
-			call putChar
-			mov dl, char1
-			call putChar
-			lea dx, turnMessage
-			call printString
-; \\\ --------------------------------------------
-			lea dx, newline
-			call printString
-			jmp endPlayerSwitch
-		p2turn:; previous player was 1
-			shl player, 1; 0001b --> 0010b
-; /// --------------------------------------------
-			mov dx, offset player2
-			call printString
-			mov dl, ':'
-			call putChar
-			mov dl, char2
-			call putChar
-			lea dx, turnMessage
-; \\\ --------------------------------------------
-			call printString
-			lea dx, newline
-			call printString
+
+		; previous player was 2
+		shr player, 1; 0010b --> 0001b;
+		mov dx, offset player1
+		call printString     
+		mov dl, ':'
+		call putChar
+		mov dl, char1
+		call putChar
+		lea dx, turnMessage
+		call printString    
+		lea dx, newline
+		call printString
+		jmp endPlayerSwitch
+
+	p2turn:; previous player was 1
+		shl player, 1; 0001b --> 0010b 
+		mov dx, offset player2
+		call printString    
+		mov dl, ':'
+		call putChar    
+		mov dl, char2
+		call putChar
+		lea dx, turnMessage
+		call printString
+		lea dx, newline
+		call printString
 			
-		endPlayerSwitch:
+	endPlayerSwitch:
 		call getMove; bx will point to the right board postiton at the end of getMove
 		mov dl, player
 		cmp dl, 1
-		jne p2move
-; /// --------------------------------------------
-		mov dl, char1
-; \\\ --------------------------------------------
+		jne p2move    
+		mov dl, char1        
 		jmp contMoves
-		p2move:
-; /// --------------------------------------------
+	p2move:
 		mov dl, char2
-; \\\ --------------------------------------------
-		contMoves:
+	contMoves:
 		mov [bx], dl
 		cmp cx, 5 ; no need to check before the 5th turn
 		jg noWinCheck
 		call checkWin
 		cmp win, 1
 		je won
-		noWinCheck:
+	noWinCheck:
 		loop gameAgain
 		
-	;tie, cx = 0 at this point and no player has won
-	 call clearScreen
-	 lea dx, welcome
-	 call printString
-	 lea dx, newline
-	 call printString
-	 call printString
-	 call printString
-	 call printGrid
-	 lea dx, tieMessage
-	 call printString
-	 lea dx, newline
-	 call printString
-	 jmp askForNewGame
-	 
+		;tie, cx = 0 at this point and no player has won
+		 call clearScreen
+		 lea dx, welcome
+		 call printString
+		 lea dx, newline
+		 call printString
+		 call printString
+		 call printString
+		 call printGrid
+		 lea dx, tieMessage
+		 call printString
+		 lea dx, newline
+		 call printString
+		 jmp menu
+	
+	; PLAYER WIN
 	won:; current player has won
-	 call clearScreen
-	 lea dx, welcome
-	 call printString
-	 lea dx, newline
-	 call printString
-	 call printString
-	 call printString
-	 call printGrid
-	 lea dx, winMessage
-	 call printString
-	 mov dl, player
-; /// --------------------------------------------
-	 cmp dl, 1
-	 je printPlayer1
-	 mov dx, offset player2
-	 call printString
-	 here:
-	 add dl, '0'
-	 lea dx, newline
-; \\\ --------------------------------------------
-	 call printString
+	call clearScreen
+	lea dx, welcome
+	call printString
+	lea dx, newline
+	call printString
+	call printString
+	call printString
+	call printGrid
+	lea dx, winMessage
+	call printString
+	mov dl, player
+	cmp dl, 1
+	je printPlayer1
+	mov dx, offset player2
+	call printString
+	here: 
+	add dl, '0'
+	lea dx, newline
+	call printString
+	call getChar
+	call menu
 	 
-	askForNewGame:
-	 lea dx, newGameQuest; ask for another game
-	 call printString
-	 lea dx, newline
-	 call printString
-	 call getChar
-	 cmp al, 'y'; play again if 'y' is pressed
-	 jne sof
-	 jmp newGame
+	askForQuitGame:
+	lea dx, newline
+	call printString
+	lea dx, quitGameQuest; ask for another game
+	call printString
+	lea dx, newline
+	call printString
+	call getChar
+	cmp al, 's'; play again if 's' is pressed
+	jne menu
+	jmp sof
 	 
 	sof:
 	mov ax, 4c00h
 	int 21h
-	
+
+;-------------------------------------------;
+; Menu
+;
+menu:
+	call clearScreen
+	lea dx, menuTitle
+	call printString   
+	lea dx, newline
+	call printString
+	lea dx, menuItem1
+	call printString   
+	lea dx, newline
+	call printString
+	lea dx, menuItem2
+	call printString   
+	lea dx, newline
+	call printString
+	lea dx, menuItem3
+	call printString   
+	lea dx, newline
+	call printString
+	lea dx, menuItem4
+	call printString   
+	lea dx, newline
+	call printString
+	lea dx, menuItem5
+	call printString   
+	lea dx, newline
+	call printString
+	lea dx, menuItem6
+	call printString   
+	lea dx, newline
+	call printString
+	lea dx, menuItem7
+	call printString   
+	lea dx, newline
+	call printString
+	lea dx, msgOpcao
+	call printString   
+	lea dx, newline
+	call printString
+	call getOpcao
+
+getOpcao:
+	call getChar; al = getchar()
+	call isValidDigit2
+	cmp ah, 1
+	je acessaOpcoes
+	mov dl, 0dh
+	call putChar
+	lea dx, inError
+	call printString
+	lea dx, newline
+	call printString
+	jmp getOpcao
+
+acessaOpcoes:
+	cmp al, '1'
+	je getNameP1
+	cmp al, '2'
+	je getNameP2
+	cmp al, '3'
+	je getSymbolP1
+	cmp al, '4'
+	je getSymbolP2
+	cmp al, '5'
+	je newGame
+	cmp al, '6'
+	je newGame
+	cmp al, '7'
+	je askForQuitGame
+
+
 ;-------------------------------------------;
 ; Sets ah = 01
 ; Input char into al;
@@ -229,12 +327,9 @@ getChar:
 ; Output char from dl
 ; Sets ah to last char output
 putChar:
-; /// --------------------------------------------
-; ????????????????	mov ah, 02h
-; \\\ --------------------------------------------
-	mov ah, 02
-	int 21h
-	ret
+	mov ah, 02h 
+	int 21h     
+	ret    
 ;-------------------------------------------;
 ; Sets ah = 09
 ; Outputs string from dx
@@ -270,8 +365,9 @@ getMove:
 	lea dx, newline
 	call printString
 	jmp getMove
+
 	
-	contCheckTaken: ; Checks this: if(grid[al] > '9'), grid[al] == 'O' or 'X'
+contCheckTaken: ; Checks this: if(grid[al] > '9'), grid[al] == 'O' or 'X'
 	lea bx, grid	
 	sub al, '1'
 	mov ah, 0
@@ -286,7 +382,7 @@ getMove:
 	lea dx, newline
 	call printString
 	jmp getMove
-	finishGetMove:
+finishGetMove:
 	lea dx, newline
 	call printString
 	ret
@@ -316,14 +412,24 @@ isValidDigit:
 	cmp al, '9'
 	jg sofIsDigit
 	mov ah, 1
-	sofIsDigit:
+
+sofIsDigit:
+	ret
+
+isValidDigit2:
+	mov ah, 0
+	cmp al, '1'
+	jl sofIsDigit
+	cmp al, '7'
+	jg sofIsDigit
+	mov ah, 1
 	ret
 	
 	
 ;-------------------------------------------;	
 ; Outputs the 3x3 grid
 ; uses bx, dl, dx
-printGrid:
+printGrid:     
 	lea bx, grid
 	call printRow
 	lea dx, separator
@@ -346,11 +452,10 @@ printGrid:
 ; bx += 3, for the next row
 ; dx points to newline
 printRow:
-
 	;First Cell
 	mov dl, ' '
-	call putChar
-	mov dl, [bx]
+	call putChar 
+	mov dl, [bx] 
 	call putChar
 	mov dl, ' '
 	call putChar
@@ -396,6 +501,15 @@ checkWin:
 	endCheckWin:
 	ret
 	
+drawDiag1:
+
+drawDiag2:
+
+drawRow:
+
+drawCol:
+
+
 ;-------------------------------------------;	
 checkDiagonal:
 	;DiagonalLtR
@@ -407,7 +521,8 @@ checkDiagonal:
 	add bx, 4	;grid[4] ---> grid[8]
 	cmp al, [bx]
 	jne diagonalRtL
-	mov win, 1
+	;mov win, 1
+	call drawDiag1
 	ret
 	
 	diagonalRtL:
@@ -420,7 +535,8 @@ checkDiagonal:
 	add bx, 2	;grid[4] ---> grid[6]
 	cmp al, [bx]
 	jne endCheckDiagonal
-	mov win, 1
+	;mov win, 1
+	call drawDiag2
 	endCheckDiagonal:
 	ret
 	
@@ -435,7 +551,8 @@ checkRows:
 	inc bx		;grid[1] ---> grid[2]
 	cmp al, [bx]
 	jne secondRow
-	mov win, 1
+	;mov win, 1
+	call drawRow
 	ret
 	
 	secondRow:
@@ -448,7 +565,8 @@ checkRows:
 	inc bx	;grid[4] ---> grid[5]
 	cmp al, [bx]
 	jne thirdRow
-	mov win, 1
+	;mov win, 1
+	call drawRow
 	ret
 	
 	thirdRow:
@@ -461,7 +579,8 @@ checkRows:
 	inc bx	;grid[7] ---> grid[8]
 	cmp al, [bx]
 	jne endCheckRows
-	mov win, 1
+	;mov win, 1
+	call drawRow
 	endCheckRows:
 	ret
 	
@@ -476,7 +595,8 @@ CheckColumns:
 	add bx, 3	;grid[3] ---> grid[6]
 	cmp al, [bx]
 	jne secondColumn
-	mov win, 1
+	;mov win, 1
+	call drawCol
 	ret
 	
 	secondColumn:
@@ -489,7 +609,8 @@ CheckColumns:
 	add bx, 3	;grid[4] ---> grid[7]
 	cmp al, [bx]
 	jne thirdColumn
-	mov win, 1
+	;mov win, 1
+	call drawCol
 	ret
 	
 	thirdColumn:
@@ -502,68 +623,74 @@ CheckColumns:
 	add bx, 3	;grid[5] ---> grid[8]
 	cmp al, [bx]
 	jne endCheckColumns
-	mov win, 1
+	;mov win, 1
+	call drawCol
 	endCheckColumns:
 	ret
+	       
+    printPlayer1:
+		mov dx, offset player1
+		call printString
+		jmp here
+	 	       
+	getstr proc
 
-; /// --------------------------------------------
-	printPlayer1:
-	mov dx, offset player1
-	call printString
-	jmp here
+        ; preserva used register
+        push ax
+        push bx
+        push si
 
-	getStr proc
+        ; si used as base address
+        mov     si, dx
 
-	; preserva o uso dos registradores
-	push ax
-	push bx
-	push si
+        ; bx used as index to the base address
+          mov     bx, 0   
+            
+        L11:        
+            ; read next character
+            mov     ah, 1
+            int     21h
 
-	; si usado como base address
-	mov si, dx
+            ; Check if it is not return 
+            ; (indicating the end of line)                                 
+            cmp     al, 13 ; return character
+            jz      L12
 
-	;bx usado como indice para o base address
-	mov bx, 0
+            ; save the read character in buffer.
+            mov     [si][bx], al
 
-	L11:
-		; le o proximo caracter
-		mov ah, 1
-		int 21h
+            ; next index of buffer
+            inc     bx
 
-		; verifica se nao eh retorno (indicando o fim de linha)
-		cmp al, 13	; return caracter
-		jz L12
+        L12:
+            ; loop until count-down is zero and not 
+            ; matched return character            
+            loopnz  L11
 
-		; salva o caracter lido no buffer
-		mov [si][bx], al
+            ; bx contains the length of string.
+            ; save it in cx                          
+            mov     cx, bx
 
-		; proximo indice do buffer
-		inc bx
+            ; append a sequence of return, 
+            ;inc     bx
+            ;mov     [si][bx], 13                                                                  
 
-	L12:
-		; loop enquanto o contador eh zero
-		; se nao for retorna caracter
-		loopnz L11
+            ; new-line and                               
+            ;inc     bx
+            ;mov     [si][bx], 10                                                                  
 
-		; bx contem o tamanho da string
-		; salva em cx
-		mov cx, bx
+            ; '$' character to the string          
+            inc     bx
+            mov     [si][bx], '$'                                                                  
 
-		; adiciona na sequencia retornada
-		; inc bx
-		; mov [si][bx], 10
-
-		; nova linha e
-		; inc bx
-		; mov [si][bx], 10
-
-		; libera registradores usados
-		pop si
-		pop bx
-		pop ax
-		ret
-	getstr endp
-; \\\ --------------------------------------------
+            ; recover used register          
+            pop     si
+            pop     bx
+            pop     ax
+            ret
+    getstr   endp      
 	
 ends
 end start
+
+
