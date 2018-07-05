@@ -7,12 +7,12 @@ name "Tic-Tac-Toe"
 ; Modificado por Rodrigo Sousa Alves
 data segment
     
-    strtam= 15 ; tamanho maximo da string   
+    str_TAM= 20 ; tamanho maximo da string   
     
     ; buffers salvam strings de player 1 e 2
-    player1     db  strtam dup (?)
+    player1     db  str_TAM dup (?)
                 db  1 dup (?) ; posiçao extra para guardar '$'
-    player2     db  strtam dup (?)
+    player2     db  str_TAM dup (?)
                 db  1 dup (?) ;posiçao extra para guardar '$'
     msgName1    db "Player 1 escolha um nome: $"
     msgName2    db "Player 2 escolha um nome: $"
@@ -70,7 +70,7 @@ start:
 		lea dx, msgName1
 		call printString
 		; chama getstr pra ler o nome do player 1 do teclado
-	    mov     cx, strtam
+	    mov     cx, str_TAM
 	    mov     dx, offset player1
 	    call    getstr
 	                     	
@@ -98,7 +98,7 @@ start:
 		lea dx, msgName2
 		call printString
 		; chama getstr pra ler o nome do player 2 do teclado
-	    mov     cx, strtam
+	    mov     cx, str_TAM
 	    mov     dx, offset player2
 	    call    getstr
 	    
